@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A Task for creating an EC2  linux instance with docker
+Resource:
+    EC2Node:
+      Type: AWS::EC2::Instance
+      Properties: t2.micro
+      ImageId: ami-0474863011a7d1541
+      KeyName: aws-key
+      SecurityGroup:
+      - !Ref EC2SecurityGroups 
+      UserData: !Base64
+      #! /bin/sh
+      sudo yum update -y
+      sudo amazon-linux-extras install docker
+      service docker start
+      sudo usermod -a -G docker ec2-user
+      chkconfig docker on
+    EC2SecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+      GroupDescription: To allow http(80) and docker ports and ssh
+      SecurityGroupIngress:
+      IpProtocol: tcp
+      FormPort: '80'
+      ToPort: '80'
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FroPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+
+      // aws cloudformation create-stack --stackname task --template-body file://$PWD/linuxec2.yml --profile devops --reg eu-central-1
